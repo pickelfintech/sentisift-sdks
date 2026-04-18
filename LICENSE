@@ -1,0 +1,43 @@
+SentiSift SDKs License
+======================
+
+Copyright (c) 2026 Pickel Fintech.
+
+The SentiSift client libraries published from this repository
+("the Software") - namely `sentisift` (PyPI), `@sentisift/client` (npm),
+and `sentisift-mcp` (PyPI) - are made available for use by SentiSift API
+customers under the following terms:
+
+1. PERMITTED USE
+   The Software may be used in any application, commercial or
+   non-commercial, that interacts with the SentiSift API service at
+   https://api.sentisift.com.
+
+2. SOURCE AVAILABILITY
+   The source code in this repository is published for transparency,
+   audit, and developer convenience. You may read, fork, and modify the
+   code for the sole purpose of integrating with the SentiSift API.
+
+3. RESTRICTIONS
+   You may not:
+   (a) republish the Software under a different name claiming authorship,
+   (b) distribute modified versions that pretend to be the official
+       client (use a fork name and clearly mark it as unofficial),
+   (c) use the Software to implement a competing comment-moderation,
+       sentiment-analysis, or content-intelligence API.
+
+4. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+   BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
+
+5. API TERMS OF SERVICE
+   Use of the SentiSift API itself is governed separately by the terms
+   at https://sentisift.com/terms.html.
+
+For licensing inquiries (including permission for restricted uses),
+contact tom@sentisift.com.

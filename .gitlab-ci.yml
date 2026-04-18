@@ -1,0 +1,218 @@
+# SentiSift SDKs - GitLab CI pipeline.
+#
+# This is the public SDK monorepo. The private SentiSift API service lives in
+# pickel-fintech/sentisift; this repo contains only the published client packages.
+#
+# Jobs:
+#   - sdk-python-test: run pytest on every push touching python/
+#   - sdk-node-test: run vitest + typecheck on every push touching node/
+#   - sdk-mcp-test: run pytest on every push touching mcp/
+#   - sdk-python-publish: publish to PyPI on tag push matching py-v*
+#   - sdk-node-publish: publish to npm on tag push matching node-v*
+#   - sdk-mcp-publish: publish to PyPI on tag push matching mcp-v*
+#
+# Required CI/CD variables (set in Settings -> CI/CD -> Variables):
+#   NPM_TOKEN   - Granular Access Token from npmjs.com with "Bypass 2FA when
+#                 publishing" enabled. Masked + Protected. Renewed every 90 days.
+#   (PyPI uses Trusted Publishing via OIDC, no token needed after setup.)
+#
+# Required Protected Tags (Settings -> Repository -> Protected tags):
+#   py-v*    -> Maintainers
+#   mcp-v*   -> Maintainers
+#   node-v*  -> Maintainers
+#
+# Required PyPI Trusted Publishers:
+#   sentisift     -> project: pickel-fintech/sentisift-sdks, env: publish-pypi
+#   sentisift-mcp -> project: pickel-fintech/sentisift-sdks, env: publish-pypi-mcp
+#   (Distinct env names per project are MANDATORY - see RELEASE_RUNBOOK.md.)
+#
+# Tag to release:
+#   git tag py-v0.X.Y    -> triggers PyPI publish (sentisift)
+#   git tag mcp-v0.X.Y   -> triggers PyPI publish (sentisift-mcp)
+#   git tag node-v0.X.Y  -> triggers npm publish (@sentisift/client)
+#   git push origin <tag>
+
+stages:
+  - test
+  - publish
+
+default:
+  interruptible: true
+
+# -----------------------------------------------------------------------
+# Python SDK
+# -----------------------------------------------------------------------
+sdk-python-test:
+  stage: test
+  image: python:3.11-slim
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        - python/**/*
+        - .gitlab-ci.yml
+    - if: $CI_COMMIT_TAG =~ /^py-v/
+  before_script:
+    - cd python
+    - pip install --quiet -e ".[dev]"
+  script:
+    - ruff check src tests || true  # report but do not fail on first run
+    - pytest tests/ -v
+
+sdk-python-publish:
+  stage: publish
+  image: python:3.11-slim
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^py-v[0-9]+\.[0-9]+\.[0-9]+$/
+  # PyPI Trusted Publishing for `sentisift` requires environment="publish-pypi"
+  # in the OIDC claim. Configured at pypi.org/manage/project/sentisift/settings/publishing.
+  environment:
+    name: publish-pypi
+    url: https://pypi.org/project/sentisift/
+  id_tokens:
+    PYPI_ID_TOKEN:
+      aud: pypi
+  needs: [sdk-python-test]
+  before_script:
+    - cd python
+    - pip install --quiet build twine id
+  script:
+    - |
+      SDK_VERSION=$(grep -oE 'version = "[^"]+"' pyproject.toml | head -1 | cut -d'"' -f2)
+      TAG_VERSION="${CI_COMMIT_TAG#py-v}"
+      if [ "$SDK_VERSION" != "$TAG_VERSION" ]; then
+        echo "Version mismatch: tag=$TAG_VERSION, pyproject=$SDK_VERSION"
+        exit 1
+      fi
+    - python -m build
+    # We mint a short-lived PyPI API token from the GitLab JWT using Python's
+    # urllib (the slim image has no curl). $PYPI_ID_TOKEN holds the JWT value
+    # directly. The minted token is then passed to twine. On HTTP error we
+    # print PyPI's response body to stderr for diagnostics.
+    - |
+      PYPI_API_TOKEN=$(python - <<'PY'
+      import json, os, sys, urllib.error, urllib.request
+      req = urllib.request.Request(
+          "https://pypi.org/_/oidc/mint-token",
+          data=json.dumps({"token": os.environ["PYPI_ID_TOKEN"]}).encode(),
+          headers={"Content-Type": "application/json"},
+      )
+      try:
+          with urllib.request.urlopen(req) as resp:
+              print(json.load(resp)["token"])
+      except urllib.error.HTTPError as err:
+          sys.stderr.write(f"OIDC mint-token failed: HTTP {err.code}\n")
+          sys.stderr.write(err.read().decode("utf-8", errors="replace") + "\n")
+          raise
+      PY
+      )
+      twine upload --username __token__ --password "$PYPI_API_TOKEN" dist/*
+
+# -----------------------------------------------------------------------
+# MCP server (sentisift-mcp)
+# -----------------------------------------------------------------------
+sdk-mcp-test:
+  stage: test
+  image: python:3.11-slim
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        - mcp/**/*
+        - python/**/*        # MCP depends on the Python SDK; test together
+        - .gitlab-ci.yml
+    - if: $CI_COMMIT_TAG =~ /^mcp-v/
+  before_script:
+    - pip install --quiet -e "python" -e "mcp[dev]"
+  script:
+    - cd mcp
+    - ruff check src tests || true  # report but do not fail on first run
+    - pytest tests/ -v
+
+sdk-mcp-publish:
+  stage: publish
+  image: python:3.11-slim
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^mcp-v[0-9]+\.[0-9]+\.[0-9]+$/
+  # `sentisift-mcp` MUST use a different environment name than `sentisift`
+  # so PyPI can disambiguate which project's trusted publisher to mint the
+  # OIDC token for. Without a distinct env name, both publishers match the
+  # same OIDC claims (same project, same workflow file) and PyPI mints a
+  # token scoped to the wrong project, causing twine upload to fail with
+  # 403 Forbidden. Configured at pypi.org/manage/project/sentisift-mcp/settings/publishing.
+  environment:
+    name: publish-pypi-mcp
+    url: https://pypi.org/project/sentisift-mcp/
+  id_tokens:
+    PYPI_ID_TOKEN:
+      aud: pypi
+  needs: [sdk-mcp-test]
+  before_script:
+    - cd mcp
+    - pip install --quiet build twine id
+  script:
+    - |
+      SDK_VERSION=$(grep -oE 'version = "[^"]+"' pyproject.toml | head -1 | cut -d'"' -f2)
+      TAG_VERSION="${CI_COMMIT_TAG#mcp-v}"
+      if [ "$SDK_VERSION" != "$TAG_VERSION" ]; then
+        echo "Version mismatch: tag=$TAG_VERSION, pyproject=$SDK_VERSION"
+        exit 1
+      fi
+    - python -m build
+    - |
+      PYPI_API_TOKEN=$(python - <<'PY'
+      import json, os, sys, urllib.error, urllib.request
+      req = urllib.request.Request(
+          "https://pypi.org/_/oidc/mint-token",
+          data=json.dumps({"token": os.environ["PYPI_ID_TOKEN"]}).encode(),
+          headers={"Content-Type": "application/json"},
+      )
+      try:
+          with urllib.request.urlopen(req) as resp:
+              print(json.load(resp)["token"])
+      except urllib.error.HTTPError as err:
+          sys.stderr.write(f"OIDC mint-token failed: HTTP {err.code}\n")
+          sys.stderr.write(err.read().decode("utf-8", errors="replace") + "\n")
+          raise
+      PY
+      )
+      twine upload --username __token__ --password "$PYPI_API_TOKEN" dist/*
+
+# -----------------------------------------------------------------------
+# Node SDK
+# -----------------------------------------------------------------------
+sdk-node-test:
+  stage: test
+  image: node:20-slim
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        - node/**/*
+        - .gitlab-ci.yml
+    - if: $CI_COMMIT_TAG =~ /^node-v/
+  before_script:
+    - cd node
+    - npm ci --no-audit --no-fund
+  script:
+    - npx tsc --noEmit
+    - npx vitest run
+    - npx tsup src/index.ts --format cjs,esm --dts --clean
+
+sdk-node-publish:
+  stage: publish
+  image: node:20-slim
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^node-v[0-9]+\.[0-9]+\.[0-9]+$/
+  needs: [sdk-node-test]
+  before_script:
+    - cd node
+    - npm ci --no-audit --no-fund
+  script:
+    - |
+      PKG_VERSION=$(node -p "require('./package.json').version")
+      TAG_VERSION="${CI_COMMIT_TAG#node-v}"
+      if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+        echo "Version mismatch: tag=$TAG_VERSION, package.json=$PKG_VERSION"
+        exit 1
+      fi
+    - npx tsup src/index.ts --format cjs,esm --dts --clean
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    - npm publish --access public

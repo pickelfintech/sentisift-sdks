@@ -1,0 +1,86 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sentisift"
+version = "0.1.1"
+description = "Official Python client for the SentiSift comment-moderation and intelligence API."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Proprietary" }
+authors = [
+    { name = "Pickel Fintech", email = "tom@sentisift.com" },
+]
+keywords = [
+    "sentisift",
+    "sentiment-analysis",
+    "comment-moderation",
+    "content-moderation",
+    "bot-detection",
+    "nlp",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+dependencies = [
+    "httpx>=0.25",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "respx>=0.20",
+    "mypy>=1.5",
+    "ruff>=0.1",
+]
+
+[project.urls]
+Homepage = "https://sentisift.com"
+Documentation = "https://sentisift.com/api-docs.html"
+"API Reference (Markdown)" = "https://sentisift.com/api-docs.md"
+"OpenAPI Spec" = "https://sentisift.com/openapi.json"
+Repository = "https://gitlab.com/pickel-fintech/sentisift-sdks"
+Changelog = "https://gitlab.com/pickel-fintech/sentisift-sdks/-/blob/main/python/CHANGELOG.md"
+Issues = "https://gitlab.com/pickel-fintech/sentisift-sdks/-/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sentisift"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/sentisift",
+    "README.md",
+    "CHANGELOG.md",
+    "pyproject.toml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+warn_unused_ignores = true
+warn_return_any = true
