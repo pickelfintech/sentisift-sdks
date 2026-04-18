@@ -1,6 +1,6 @@
 {
   "name": "@sentisift/client",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Official TypeScript/JavaScript client for the SentiSift comment-moderation and intelligence API.",
   "license": "SEE LICENSE IN https://sentisift.com/terms.html",
   "author": "Pickel Fintech <tom@sentisift.com>",

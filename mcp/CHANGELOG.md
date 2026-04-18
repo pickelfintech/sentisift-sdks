@@ -4,6 +4,12 @@ All notable changes to the `sentisift-mcp` package are documented here.
 
 This project follows [Semantic Versioning](https://semver.org/). Before 1.0.0, minor-version bumps may include breaking changes; patch versions are always backward-compatible.
 
+## [0.1.2] - 2026-04-18
+
+### Changed
+
+- Package metadata `Repository` URL now points at the new public repo: https://gitlab.com/pickel-fintech/sentisift-sdks (was: a private repo URL that returned 404 for visitors clicking through from PyPI). No code changes; `sentisift` dependency pin remains `>=0.1.1,<1.0` (also accepts the new 0.1.2).
+
 ## [0.1.1] - 2026-04-18
 
 ### Fixed

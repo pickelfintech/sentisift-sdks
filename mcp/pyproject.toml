@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sentisift-mcp"
-version = "0.1.1"
+version = "0.1.2"
 description = "Official Model Context Protocol (MCP) server for SentiSift. Lets Claude Desktop, Cursor, VS Code, Continue, and other MCP-compatible AI hosts call the SentiSift comment-moderation and intelligence API as a native tool."
 readme = "README.md"
 requires-python = ">=3.10"
