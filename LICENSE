@@ -1,43 +1,29 @@
-SentiSift SDKs License
-======================
+MIT License
 
-Copyright (c) 2026 Pickel Fintech.
+Copyright (c) 2026 Pickel Fintech
 
-The SentiSift client libraries published from this repository
-("the Software") - namely `sentisift` (PyPI), `@sentisift/client` (npm),
-and `sentisift-mcp` (PyPI) - are made available for use by SentiSift API
-customers under the following terms:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-1. PERMITTED USE
-   The Software may be used in any application, commercial or
-   non-commercial, that interacts with the SentiSift API service at
-   https://api.sentisift.com.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-2. SOURCE AVAILABILITY
-   The source code in this repository is published for transparency,
-   audit, and developer convenience. You may read, fork, and modify the
-   code for the sole purpose of integrating with the SentiSift API.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-3. RESTRICTIONS
-   You may not:
-   (a) republish the Software under a different name claiming authorship,
-   (b) distribute modified versions that pretend to be the official
-       client (use a fork name and clearly mark it as unofficial),
-   (c) use the Software to implement a competing comment-moderation,
-       sentiment-analysis, or content-intelligence API.
+---
 
-4. NO WARRANTY
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
-   BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM,
-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-   DEALINGS IN THE SOFTWARE.
-
-5. API TERMS OF SERVICE
-   Use of the SentiSift API itself is governed separately by the terms
-   at https://sentisift.com/terms.html.
-
-For licensing inquiries (including permission for restricted uses),
-contact tom@sentisift.com.
+Note: This MIT license applies to the SDK source code in this repository
+(the Python, Node, and MCP-server clients). The SentiSift API service that
+these clients call is a separate hosted service governed by the Terms of
+Service at https://sentisift.com/terms.html. Use of the API requires an
+API key obtained from https://sentisift.com/pricing.

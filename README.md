@@ -94,7 +94,7 @@ Documentation is hosted on [sentisift.com](https://sentisift.com):
 
 ## License
 
-The published SDK packages are MIT-equivalent for usage (see each package's `package.json` / `pyproject.toml` `license` field). Repository code is owned by Pickel Fintech; see [LICENSE](LICENSE) for the full text and [sentisift.com/terms.html](https://sentisift.com/terms.html) for the API terms of service.
+The SDK source code in this repository is **MIT licensed** — see [LICENSE](LICENSE). The SentiSift API service itself is a separate hosted service governed by the Terms of Service at [sentisift.com/terms.html](https://sentisift.com/terms.html). Use of the API requires an API key obtained from [sentisift.com/pricing](https://sentisift.com/pricing.html).
 
 ## Contact
 

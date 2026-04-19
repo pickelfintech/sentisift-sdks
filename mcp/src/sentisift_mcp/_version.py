@@ -1,2 +1,2 @@
 """MCP package version. Keep in sync with pyproject.toml and CHANGELOG.md."""
-__version__ = "0.1.2"
+__version__ = "0.1.3"

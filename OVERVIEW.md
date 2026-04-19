@@ -8,9 +8,9 @@ Current state of the SentiSift client SDKs in this repository (`pickel-fintech/s
 
 | Package | Version | Registry | Status |
 |---|---|---|---|
-| `sentisift` (Python SDK) | 0.1.2 | https://pypi.org/project/sentisift/ | Live. 0.1.0 yanked. |
-| `@sentisift/client` (Node SDK) | 0.1.2 | https://www.npmjs.com/package/@sentisift/client | Live. 0.1.0 had a `HealthResponse.progress` bug; deprecation pending (see RELEASE_RUNBOOK.md section 0.5). |
-| `sentisift-mcp` (MCP server) | 0.1.2 | https://pypi.org/project/sentisift-mcp/ | Live. 0.1.0 yanked. |
+| `sentisift` (Python SDK) | 0.1.3 | https://pypi.org/project/sentisift/ | Live. License: MIT (changed from Proprietary in 0.1.3). 0.1.0 yanked. |
+| `@sentisift/client` (Node SDK) | 0.1.3 | https://www.npmjs.com/package/@sentisift/client | Live. License: MIT (changed from custom-restrictive in 0.1.3). 0.1.0 deprecation pending (see RELEASE_RUNBOOK.md section 0.5). |
+| `sentisift-mcp` (MCP server) | 0.1.3 | https://pypi.org/project/sentisift-mcp/ | Live. License: MIT (changed from Proprietary in 0.1.3). 0.1.0 yanked. |
 
 ## Endpoint coverage matrix
 
@@ -51,6 +51,10 @@ If you add a new customer-facing endpoint to the API, update all three artifacts
 None as of 0.1.1. All three packages mirror every customer-facing endpoint with consistent semantics. The `HealthResponse.progress` schema mismatch that affected 0.1.0 was fixed in 0.1.1.
 
 ## Release history
+
+### 0.1.3 (2026-04-19)
+
+License switch: SDK source code is now MIT-licensed (was custom proprietary in 0.1.2 and earlier). Aligns with industry default for B2B API client libraries (Stripe, OpenAI, Anthropic, Twilio). Removes evaluation friction for corporate procurement filters and improves directory scores (Glama, etc.). The API service itself is unchanged and remains governed by sentisift.com/terms.html.
 
 ### 0.1.2 (2026-04-18)
 

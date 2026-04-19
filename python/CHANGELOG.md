@@ -4,6 +4,12 @@ All notable changes to the `sentisift` Python SDK are documented here.
 
 This project follows [Semantic Versioning](https://semver.org/). Before 1.0.0, minor-version bumps may include breaking changes; patch versions are always backward-compatible.
 
+## [0.1.3] - 2026-04-19
+
+### Changed
+
+- Switched the SDK license from a custom proprietary license to standard **MIT** (matches industry default for B2B API client libraries: Stripe, OpenAI, Anthropic, Twilio, etc.). The SentiSift API service itself is unchanged and remains governed by https://sentisift.com/terms.html. No code changes in this release.
+
 ## [0.1.2] - 2026-04-18
 
 ### Changed

@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sentisift"
-version = "0.1.2"
+version = "0.1.3"
 description = "Official Python client for the SentiSift comment-moderation and intelligence API."
 readme = "README.md"
 requires-python = ">=3.9"
-license = { text = "Proprietary" }
+license = { text = "MIT" }
 authors = [
     { name = "Pickel Fintech", email = "tom@sentisift.com" },
 ]

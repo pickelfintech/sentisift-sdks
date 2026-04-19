@@ -169,4 +169,4 @@ sentisift>=0.1,<0.2
 
 ## License
 
-Proprietary. See project terms at [sentisift.com/terms.html](https://sentisift.com/terms.html).
+MIT. See [LICENSE](https://gitlab.com/pickel-fintech/sentisift-sdks/-/blob/main/LICENSE) (also mirrored at [GitHub](https://github.com/pickelfintech/sentisift-sdks/blob/main/LICENSE)). Use of the SentiSift API itself is governed by https://sentisift.com/terms.html.
