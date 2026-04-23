@@ -19,11 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Note: This MIT license applies to the SDK source code in this repository
-(the Python, Node, and MCP-server clients). The SentiSift API service that
-these clients call is a separate hosted service governed by the Terms of
-Service at https://sentisift.com/terms.html. Use of the API requires an
-API key obtained from https://sentisift.com/pricing.
