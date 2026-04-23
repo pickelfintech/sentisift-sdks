@@ -161,4 +161,6 @@ Source and issue tracker: [gitlab.com/pickel-fintech/sentisift-sdks](https://git
 
 ## License
 
-Proprietary. See project terms at [sentisift.com/terms.html](https://sentisift.com/terms.html).
+MIT — see [LICENSE](LICENSE). The SentiSift API service that this client
+calls is governed separately by [sentisift.com/terms.html](https://sentisift.com/terms.html);
+use of the API requires an API key from [sentisift.com/pricing](https://sentisift.com/pricing).
