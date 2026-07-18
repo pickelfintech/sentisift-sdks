@@ -368,7 +368,9 @@ Example:
 
 ## 8. npm token renewal (every 90 days)
 
-The Granular Access Token in GitLab CI (`NPM_TOKEN`) expires every 90 days. Tom has a calendar reminder. When that reminder fires, he'll paste a request to you. Procedure:
+The Granular Access Token in GitLab CI (`NPM_TOKEN`) expires every 90 days (npm's hard maximum for granular tokens — there is no longer-lived option). Tom has a calendar reminder. When that reminder fires, he'll paste a request to you. Procedure:
+
+> **Deprecation on the clock.** npm is restricting "Bypass 2FA" tokens: account changes from **Aug 2026**, direct publishing from **Jan 2027** (https://github.blog/changelog/2026-07-08-npm-install-time-security-and-gat-bypass2fa-deprecation/). This whole procedure depends on a Bypass-2FA token, so it has an expiry as a strategy. Before the renewal that would land a token living past **Jan 2027**, migrate `sdk-node-publish` to npm OIDC / trusted publishing (the same tokenless model the PyPI jobs already use) and delete `NPM_TOKEN`. Until then, keep renewing.
 
 1. Tell Tom to go to `https://www.npmjs.com/settings/<his-npm-username>/tokens` and click "Generate New Token" -> Granular Access Token.
 2. Settings:
@@ -379,7 +381,7 @@ The Granular Access Token in GitLab CI (`NPM_TOKEN`) expires every 90 days. Tom 
    - Packages and scopes: `@sentisift` scope, Read and write.
    - Organizations: `sentisift`, Read and write.
 3. Tell Tom to copy the token, then go to `https://gitlab.com/pickel-fintech/sentisift-sdks/-/settings/ci_cd` -> Variables -> edit `NPM_TOKEN` -> paste the new value -> save (keep Type=Variable, Environment=*, Masked=yes, Protected=yes).
-4. Verify by triggering a small no-op pipeline (push any small commit to main and check `sdk-node-test` passes).
+4. Verify with the `sdk-node-token-check` job (in `.gitlab-ci.yml`): open the latest `main` pipeline — or push a trivial commit to `main` to create one — and click ▶ on the manual `sdk-node-token-check` job. Green means the new token authenticates (`npm whoami`) and has `@sentisift` write access (`npm access list`). **Do NOT use `sdk-node-test`** — it never reads `NPM_TOKEN` and passes with an expired or bogus token, so it proves nothing about the credential.
 5. Tell Tom to bump the calendar reminder by 90 days.
 
 ---

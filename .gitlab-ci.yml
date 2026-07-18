@@ -216,3 +216,30 @@ sdk-node-publish:
     - npx tsup src/index.ts --format cjs,esm --dts --clean
     - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
     - npm publish --access public
+
+# On-demand check that NPM_TOKEN is alive and correctly scoped. Run it from
+# a `main` pipeline after rotating the token (RELEASE_RUNBOOK.md section 8):
+# it writes the same .npmrc the publish job uses, then asks npm who the token
+# belongs to and what it can reach. Green = the token authenticates AND has
+# @sentisift write access, proven WITHOUT publishing anything.
+#
+# This exists because sdk-node-test canNOT verify the token: that job only
+# does anonymous registry installs and never reads NPM_TOKEN, so it passes
+# with an expired or bogus token. Do not "verify a renewal" with it.
+#
+# `main` is a Protected branch, so the Protected NPM_TOKEN is injected here.
+# allow_failure keeps this a non-blocking manual action: normal main pipelines
+# are never held up by it; you click it when you want the check.
+sdk-node-token-check:
+  stage: test
+  image: node:20-slim
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+      allow_failure: true
+  before_script:
+    - cd node
+  script:
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    - npm whoami --registry https://registry.npmjs.org/
+    - npm access list packages @sentisift --registry https://registry.npmjs.org/
