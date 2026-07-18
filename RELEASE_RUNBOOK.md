@@ -366,39 +366,21 @@ Example:
 
 ---
 
-## 8. npm publishing auth
+## 8. npm publishing auth (Trusted Publishing / OIDC)
 
-npm publishing is moving to **Trusted Publishing (OIDC)** — the same tokenless model the PyPI jobs already use. No `NPM_TOKEN`, no 90-day renewal treadmill. This replaces the legacy token flow (kept at the bottom of this section until the cutover is confirmed).
+npm publishing uses **Trusted Publishing (OIDC)** — the same tokenless model as the PyPI jobs. There is no `NPM_TOKEN` and no 90-day renewal. `sdk-node-publish` requests short-lived `id_tokens` (`aud: npm:registry.npmjs.org` for auth, `sigstore` for provenance) on `node:24`; npm ≥ 11.5.1 auto-detects them, so a `node-v*` tag publishes `@sentisift/client` with build provenance and no stored secret.
 
-Why now: npm is restricting "Bypass 2FA" tokens — account changes from **Aug 2026**, direct publishing from **Jan 2027** (https://github.blog/changelog/2026-07-08-npm-install-time-security-and-gat-bypass2fa-deprecation/) — so the token flow has an expiry as a strategy.
+Cut over from a Bypass-2FA `NPM_TOKEN` on **2026-07-18** (confirmed by `node-v0.1.4`), ahead of npm restricting Bypass-2FA tokens for publishing in Jan 2027 (https://github.blog/changelog/2026-07-08-npm-install-time-security-and-gat-bypass2fa-deprecation/).
 
-### Cutover (do in this order — order matters)
+**Trusted publisher config** — npmjs.com → `@sentisift/client` → Settings → Trusted Publisher:
+- Publisher: GitLab CI/CD · Namespace `pickel-fintech` · Project `sentisift-sdks`
+- Top-level CI file path: `.gitlab-ci.yml` · Environment: empty · Allowed action: `npm publish`
 
-1. **Register the Trusted Publisher on npm** (Tom, in his npm account, one time). Package settings for `@sentisift/client` → **Trusted Publishers** → add a **GitLab** publisher:
-   - Namespace: `pickel-fintech`
-   - Project: `sentisift-sdks`
-   - Top-level CI file path: `.gitlab-ci.yml`
-   - Environment: leave empty
-   - Allowed actions: `npm publish` (also tick `npm stage publish` if offered)
-2. **Merge the CI change** — `sdk-node-publish` now uses `id_tokens` + `node:24` and drops the `.npmrc`/`NPM_TOKEN` line. Merging *before* step 1 is done would break the next publish, so the MR stays **Draft** until the publisher is registered.
-3. **Confirm on the next real `node-v*` release.** OIDC only exercises on an actual `npm publish` — there is no standalone check like `sdk-node-token-check`. The job prints `npm --version` (must be ≥ 11.5.1) and publishes with provenance. If it fails specifically on provenance, drop the `SIGSTORE_ID_TOKEN` block and retag.
-4. **Retire the token** once that publish is green: delete the `NPM_TOKEN` CI/CD variable, remove the `sdk-node-token-check` job, delete the legacy steps below, and cancel Tom's 90-day calendar reminder.
+**Verifying a release** — after a `node-v*` publish, the registry records the publisher:
+`curl -s https://registry.npmjs.org/@sentisift%2Fclient/<version>` should show
+`_npmUser.trustedPublisher.id: "gitlab"` and a `dist.attestations.provenance` entry. There is no manual check job — OIDC only exercises on a real publish.
 
-### Legacy token renewal (only until the cutover in step 3 is confirmed)
-
-The Granular Access Token in GitLab CI (`NPM_TOKEN`) expires every 90 days (npm's hard maximum for granular tokens — there is no longer-lived option). If a renewal is still needed before OIDC is live:
-
-1. Tell Tom to go to `https://www.npmjs.com/settings/<his-npm-username>/tokens` and click "Generate New Token" -> Granular Access Token.
-2. Settings:
-   - Token name: `SentiSift_CI_v<N>` (increment `<N>` from the previous one).
-   - Expiration: 90 days.
-   - **Bypass 2FA when publishing: enabled** (this is critical).
-   - Allowed IP ranges: empty.
-   - Packages and scopes: `@sentisift` scope, Read and write.
-   - Organizations: `sentisift`, Read and write.
-3. Tell Tom to copy the token, then go to `https://gitlab.com/pickel-fintech/sentisift-sdks/-/settings/ci_cd` -> Variables -> edit `NPM_TOKEN` -> paste the new value -> save (keep Type=Variable, Environment=*, Masked=yes, Protected=yes).
-4. Verify with the `sdk-node-token-check` job (in `.gitlab-ci.yml`): open the latest `main` pipeline — or push a trivial commit to `main` to create one — and click ▶ on the manual `sdk-node-token-check` job. Green means the new token authenticates (`npm whoami`) and has `@sentisift` write access (`npm access list`). **Do NOT use `sdk-node-test`** — it never reads `NPM_TOKEN` and passes with an expired or bogus token, so it proves nothing about the credential.
-5. Tell Tom to bump the calendar reminder by 90 days.
+**If OIDC ever breaks** (npm changes the flow, etc.): the pre-OIDC token job is in git history. Restore the `.npmrc`/`NPM_TOKEN` publish step, recreate an `NPM_TOKEN` granular token in GitLab CI/CD variables, and set npm "Publishing access" back to allow tokens. This is the fallback, not the norm.
 
 ---
 
