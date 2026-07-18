@@ -4,6 +4,12 @@ All notable changes to the `@sentisift/client` Node SDK are documented here.
 
 This project follows [Semantic Versioning](https://semver.org/). Before 1.0.0, minor-version bumps may include breaking changes; patch versions are always backward-compatible.
 
+## [0.1.4] - 2026-07-18
+
+### Changed
+
+- Publishing moved to npm **trusted publishing (OIDC)** in CI instead of a long-lived token; releases now ship with build provenance. No code changes in this release.
+
 ## [0.1.3] - 2026-04-19
 
 ### Changed
