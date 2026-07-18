@@ -11,10 +11,15 @@
 #   - sdk-node-publish: publish to npm on tag push matching node-v*
 #   - sdk-mcp-publish: publish to PyPI on tag push matching mcp-v*
 #
-# Required CI/CD variables (set in Settings -> CI/CD -> Variables):
-#   NPM_TOKEN   - Granular Access Token from npmjs.com with "Bypass 2FA when
-#                 publishing" enabled. Masked + Protected. Renewed every 90 days.
-#   (PyPI uses Trusted Publishing via OIDC, no token needed after setup.)
+# Publishing auth - all via Trusted Publishing (OIDC), no long-lived tokens:
+#   npm  - id_tokens in sdk-node-publish. Requires a Trusted Publisher for
+#          @sentisift/client registered at npmjs.com (Namespace pickel-fintech,
+#          Project sentisift-sdks, CI file .gitlab-ci.yml). See RELEASE_RUNBOOK.md.
+#   PyPI - Trusted Publishers `sentisift` / `sentisift-mcp` (OIDC).
+#
+#   NPM_TOKEN (CI/CD Variable) is being retired. Since the OIDC cutover it backs
+#   ONLY the transitional sdk-node-token-check job; delete both once the first
+#   OIDC publish has succeeded (RELEASE_RUNBOOK.md section 8).
 #
 # Required Protected Tags (Settings -> Repository -> Protected tags):
 #   py-v*    -> Maintainers
@@ -198,14 +203,27 @@ sdk-node-test:
 
 sdk-node-publish:
   stage: publish
-  image: node:20-slim
+  # Trusted publishing needs npm >= 11.5.1 / Node >= 22.14; node:24 ships them.
+  image: node:24
   rules:
     - if: $CI_COMMIT_TAG =~ /^node-v[0-9]+\.[0-9]+\.[0-9]+$/
   needs: [sdk-node-test]
+  # OIDC trusted publishing: GitLab mints these short-lived tokens per job. The
+  # npm CLI auto-detects NPM_ID_TOKEN and exchanges it for a one-time publish
+  # credential - no NPM_TOKEN, no .npmrc. SIGSTORE_ID_TOKEN lets npm attach a
+  # build-provenance attestation. Requires the @sentisift/client Trusted
+  # Publisher to be registered on npmjs.com first (see header + RELEASE_RUNBOOK).
+  id_tokens:
+    NPM_ID_TOKEN:
+      aud: "npm:registry.npmjs.org"
+    SIGSTORE_ID_TOKEN:
+      aud: sigstore
   before_script:
     - cd node
+    - npm install -g npm@latest   # guarantee npm >= 11.5.1 regardless of base image
     - npm ci --no-audit --no-fund
   script:
+    - node --version && npm --version
     - |
       PKG_VERSION=$(node -p "require('./package.json').version")
       TAG_VERSION="${CI_COMMIT_TAG#node-v}"
@@ -214,7 +232,6 @@ sdk-node-publish:
         exit 1
       fi
     - npx tsup src/index.ts --format cjs,esm --dts --clean
-    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
     - npm publish --access public
 
 # On-demand check that NPM_TOKEN is alive and correctly scoped. Run it from
